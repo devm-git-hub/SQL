@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { faker } = require('@faker-js/faker');
 const mysql = require('mysql2');
 
@@ -10,8 +11,13 @@ const connection = mysql.createConnection({
 });
 
 // A simple SELECT query
+let q = "INSERT INTO user (id, username, email, password) VALUES ?";
+let users = [
+  ["002", "Alice", "alice@example.com", "password456"],
+  ["003", "Charlie", "charlie@example.com", "password789"]
+];
 try {
-    connection.query("SHOW TABLES", (err, results) => {
+    connection.query(q, [users], (err, results) => {
     if (err) throw err;
     console.log(results);
 });
