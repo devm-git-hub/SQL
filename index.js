@@ -82,37 +82,7 @@ catch (err) {
 });
 
 
-// Update Route
-app.patch("/user/:id", (req, res) => {
-  const { id } = req.params;
-  const { username, password } = req.body;
 
-  const selectQuery = "SELECT * FROM user WHERE id = ?";
-  connection.query(selectQuery, [id], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send("Some error in DB");
-    }
-    if (results.length === 0) {
-      return res.status(404).send("User not found");
-    }
-
-    const user = results[0];
-    if (password !== user.password) {
-      return res.status(401).send("Incorrect password");
-    }
-
-    const updateQuery = "UPDATE user SET username = ? WHERE id = ?";
-    connection.query(updateQuery, [username, id], (updateErr) => {
-      if (updateErr) {
-        console.error(updateErr);
-        return res.status(500).send("Error updating username");
-      }
-
-      res.redirect("/user");
-    });
-  });
-});
 
 app.listen(8080, () => {
   console.log('Server is running on port 8080');
