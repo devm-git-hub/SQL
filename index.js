@@ -1,6 +1,8 @@
 require('dotenv').config();
 const { faker } = require('@faker-js/faker');
 const mysql = require('mysql2');
+const express = require('express');
+const app = express();
 
 // Create the connection to database
 const connection = mysql.createConnection({
@@ -19,24 +21,27 @@ let getRandomUser = () => {
 ];
 };
 
-// A simple SELECT query
-let q = "INSERT INTO user (id, username, email, password) VALUES ?";
 
-let data = [];
-for(let i = 1; i <=100; i++) {
-    data.push(getRandomUser());  //100 fake users
-}
 
-try {
-    connection.query(q, [data], (err, results) => {
+
+
+
+app.get("/", (req, res) => {
+    let q = 'SELECT count(*) FROM user';
+    try {
+    connection.query(q, (err, results) => {
     if (err) throw err;
     console.log(results);
+    res.send(results);
 });
 }
 catch (err) {
     console.log(err);
-}
+      res.send("Some error in DB");
+}}
+);
 
-// Close the connection
-connection.end();
 
+app.listen(8080, () => {
+  console.log('Server is running on port 8080');
+});
