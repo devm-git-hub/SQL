@@ -10,14 +10,25 @@ const connection = mysql.createConnection({
   password: process.env.DB_PASSWORD,
 });
 
+let getRandomUser = () => {
+  return [
+    faker.string.uuid(),
+    faker.internet.username(),
+    faker.internet.email(),
+    faker.internet.password(),
+];
+};
+
 // A simple SELECT query
 let q = "INSERT INTO user (id, username, email, password) VALUES ?";
-let users = [
-  ["002", "Alice", "alice@example.com", "password456"],
-  ["003", "Charlie", "charlie@example.com", "password789"]
-];
+
+let data = [];
+for(let i = 1; i <=100; i++) {
+    data.push(getRandomUser());  //100 fake users
+}
+
 try {
-    connection.query(q, [users], (err, results) => {
+    connection.query(q, [data], (err, results) => {
     if (err) throw err;
     console.log(results);
 });
@@ -29,11 +40,3 @@ catch (err) {
 // Close the connection
 connection.end();
 
-let getRandomUser = () => {
-  return {
-    Id: faker.string.uuid(),
-    username: faker.internet.username(),
-    email: faker.internet.email(),
-    password: faker.internet.password(),
-  };
-}
