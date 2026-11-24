@@ -4,7 +4,10 @@ const mysql = require('mysql2');
 const express = require('express');
 const app = express();
 const path = require('path');
+const methodOverride = require("method-override");
 
+app.use(methodOverride("_method"));
+app.use(express.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
@@ -27,7 +30,7 @@ let getRandomUser = () => {
 };
 
 
-//Fetcg and show total no of users
+//Fetch and show total no of users
 app.get("/", (req, res) => {
     let q = 'SELECT count(*) FROM user';
     try {
@@ -59,6 +62,57 @@ catch (err) {
 }
 })
 
+//Edit Route
+app.get("/user/edit/:id", (req, res) => {
+    let id = req.params.id;
+    let q = 'SELECT * FROM user WHERE id="${id}"';
+    try {
+    connection.query(q, (err, results) => {
+    if (err) throw err;
+    res.render("edit.ejs", { user: results[0] });
+    
+});
+}
+catch (err) {
+    console.log(err);
+      res.send("Some error in DB");
+}
+
+    res.render("edit.ejs", { user: users[0] });
+});
+
+
+// Update Route
+app.patch("/user/:id", (req, res) => {
+  const { id } = req.params;
+  const { username, password } = req.body;
+
+  const selectQuery = "SELECT * FROM user WHERE id = ?";
+  connection.query(selectQuery, [id], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Some error in DB");
+    }
+    if (results.length === 0) {
+      return res.status(404).send("User not found");
+    }
+
+    const user = results[0];
+    if (password !== user.password) {
+      return res.status(401).send("Incorrect password");
+    }
+
+    const updateQuery = "UPDATE user SET username = ? WHERE id = ?";
+    connection.query(updateQuery, [username, id], (updateErr) => {
+      if (updateErr) {
+        console.error(updateErr);
+        return res.status(500).send("Error updating username");
+      }
+
+      res.redirect("/user");
+    });
+  });
+});
 
 app.listen(8080, () => {
   console.log('Server is running on port 8080');
