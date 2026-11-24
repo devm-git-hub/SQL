@@ -3,6 +3,11 @@ const { faker } = require('@faker-js/faker');
 const mysql = require('mysql2');
 const express = require('express');
 const app = express();
+const path = require('path');
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
 
 // Create the connection to database
 const connection = mysql.createConnection({
@@ -22,17 +27,14 @@ let getRandomUser = () => {
 };
 
 
-
-
-
-
+//Fetcg and show total no of users
 app.get("/", (req, res) => {
     let q = 'SELECT count(*) FROM user';
     try {
     connection.query(q, (err, results) => {
     if (err) throw err;
-    console.log(results);
-    res.send(results);
+    let count = results[0]["count(*)"];
+    res.render("home.ejs", { count });
 });
 }
 catch (err) {
