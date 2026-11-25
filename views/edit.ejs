@@ -9,9 +9,11 @@
     <h1>Edit Username</h1>
     <form method="POST" action="/user/<%= user.id %>?_method=PATCH">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" value="<%= user.username %>">
-        <input type="password" name="password" placeholder="Enter password">
+        <input type="text" id="username" name="username" value="<%= user.username %>" required>
+        <input type="password" name="password" placeholder="Enter password" required>
         <button type="submit">Update</button>
     </form>
+    <br>
+    <a href="/user">Back to Users</a>
 </body>
 </html>

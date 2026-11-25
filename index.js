@@ -63,9 +63,9 @@ catch (err) {
 })
 
 //Edit Route
-app.get("/user/edit/:id", (req, res) => {
+app.get("/user/:id/edit", (req, res) => {
     let id = req.params.id;
-    let q = 'SELECT * FROM user WHERE id="${id}"';
+    let q = `SELECT * FROM user WHERE id='${id}'`;
     try {
     connection.query(q, (err, results) => {
     if (err) throw err;
@@ -78,12 +78,54 @@ catch (err) {
       res.send("Some error in DB");
 }
 
-    res.render("edit.ejs", { user: users[0] });
 });
 
 
+// Update Route
+app.patch("/user/:id", (req, res) => {
+  const { id } = req.params;
+  const { username, password } = req.body;
+  const trimmedUsername = (username || "").trim();
 
+  if (!trimmedUsername) {
+    return res.status(400).send("Username cannot be empty");
+  }
+
+  connection.query("SELECT * FROM user WHERE id = ?", [id], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Some error in DB");
+    }
+    if (results.length === 0) {
+      return res.status(404).send("User not found");
+    }
+
+    const dbUser = results[0];
+    if (password !== dbUser.password) {
+      return res.status(401).send("Incorrect password");
+    }
+
+    connection.query(
+      "UPDATE user SET username = ? WHERE id = ?",
+      [trimmedUsername, id],
+      (updateErr) => {
+        if (updateErr) {
+          console.error(updateErr);
+          if (updateErr.code === "ER_DUP_ENTRY") {
+            return res.status(409).send("Username already taken");
+          }
+          return res.status(500).send("Error updating username");
+        }
+
+        res.redirect("/user");
+      }
+    );
+  });
+});
 
 app.listen(8080, () => {
   console.log('Server is running on port 8080');
 });
+
+
+
